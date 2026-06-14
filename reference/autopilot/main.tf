@@ -59,7 +59,8 @@ resource "google_container_cluster" "this" {
   }
   control_plane_endpoints_config {
     dns_endpoint_config {
-      allow_external_traffic = false
+      # true = remote kubectl from anywhere (IAM-gated); false = reachable only from within Google Cloud.
+      allow_external_traffic = var.dns_allow_external_traffic
     }
     ip_endpoints_config {
       enabled = false

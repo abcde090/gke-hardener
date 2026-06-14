@@ -42,7 +42,11 @@ Then in any session: *"create a GKE cluster in Terraform"* → your agent reads 
 
 `reference/standard/` and `reference/autopilot/` are the hardened HCL the skill works from. They are meant to be **read and copied into your own Terraform** (where your provider, networking, and variables already live) — not consumed as a remote module. They are kept `terraform validate`-clean so the reference is trustworthy.
 
-> ⚠️ When you adapt them: private nodes need **Cloud NAT** (egress) + **Private Google Access** (Google APIs); Binary Authorization's default policy is **allow-all** until you author one; and `terraform plan` against your project — some private-cluster requirements only surface at plan/apply.
+> ⚠️ When you adapt them:
+> - **`dns_allow_external_traffic` has no default — you must choose.** `true` = remote `kubectl` from anywhere (IAM-gated, no VPN); `false` = control plane reachable only from within Google Cloud (Cloud Shell / bastion / VPN).
+> - Private nodes need **Cloud NAT** (egress) + **Private Google Access** (Google APIs).
+> - Binary Authorization's default policy is **allow-all** until you author one.
+> - Run `terraform plan` against your project — some private-cluster requirements only surface at plan/apply.
 
 ## License
 

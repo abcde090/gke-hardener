@@ -33,6 +33,18 @@ variable "release_channel" {
   default     = "REGULAR"
 }
 
+variable "dns_allow_external_traffic" {
+  type        = bool
+  description = <<-EOT
+    Control-plane DNS-endpoint reachability. No default — choose deliberately:
+      true  = reachable from anywhere that can reach Google APIs (remote kubectl from a
+              laptop/CI, IAM-gated, no VPN needed).
+      false = reachable ONLY from within Google Cloud (your VPC, Cloud Shell, a bastion/GCE
+              VM, or on-prem via Cloud VPN/Interconnect). Not reachable from a laptop directly.
+    IAM authenticates every request either way; pair with VPC Service Controls for defence in depth.
+  EOT
+}
+
 variable "deletion_protection" {
   type        = bool
   description = "Block accidental cluster deletion."

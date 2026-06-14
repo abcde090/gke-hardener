@@ -20,7 +20,7 @@ Use `reference/autopilot/` for a hardened Autopilot cluster, or `reference/stand
 
 ## The hardening checklist (Standard clusters)
 
-1. **Control plane by identity, not IP** — `private_cluster_config { enable_private_nodes = true }`, and `control_plane_endpoints_config { dns_endpoint_config { allow_external_traffic = false } ip_endpoints_config { enabled = false } }`. (Private nodes and the private control-plane endpoint are *two separate switches* — set both. Private nodes also need **Cloud NAT** for egress + **Private Google Access**.)
+1. **Control plane by identity, not IP** — `private_cluster_config { enable_private_nodes = true }`, and `control_plane_endpoints_config { dns_endpoint_config { allow_external_traffic = <true|false> } ip_endpoints_config { enabled = false } }`. (Private nodes and the private control-plane endpoint are *two separate switches* — set both. Private nodes also need **Cloud NAT** for egress + **Private Google Access**.) **`allow_external_traffic` is a deliberate choice:** `true` = remote `kubectl` from anywhere, IAM-gated, no VPN; `false` = control plane reachable only from within Google Cloud (Cloud Shell / bastion / VPN). Ask the user which they want.
 2. **Workload Identity** — `workload_identity_config { workload_pool = "<project>.svc.id.goog" }`, plus `node_config.workload_metadata_config.mode = "GKE_METADATA"` on the node pool.
 3. **Binary Authorization** — `binary_authorization { evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE" }`. Note the **default policy is allow-all** — you must author the policy + attestors (and wire Artifact Analysis for scanning) or enforcement admits everything.
 4. **Minimal node surface** — `enable_shielded_nodes = true`; on the node pool `shielded_instance_config { enable_secure_boot = true; enable_integrity_monitoring = true }`; a **least-privilege node SA** (`roles/container.defaultNodeServiceAccount`, never the default Compute Engine SA); `node_pool_defaults.node_config_defaults.insecure_kubelet_readonly_port_enabled = "FALSE"`; `master_auth.client_certificate_config.issue_client_certificate = false`; `service_external_ips_config { enabled = false }`; node `management { auto_repair = true; auto_upgrade = true }` on Container-Optimized OS.
@@ -40,6 +40,7 @@ Use `reference/autopilot/` for a hardened Autopilot cluster, or `reference/stand
 - `insecure_kubelet_readonly_port_enabled` is a **string** `"FALSE"`/`"TRUE"`, not a boolean.
 - Autopilot ≠ skip everything: nodes default to the Compute Engine SA unless you set a custom one in **both** `node_config` and `cluster_autoscaling.auto_provisioning_defaults`.
 - Private nodes have **no outbound internet** — add Cloud NAT + Private Google Access or image pulls fail.
+- DNS endpoint `allow_external_traffic = false` makes the control plane **unreachable from a laptop** (in-Google-Cloud only). Set `true` if the user needs remote `kubectl` without a VPN.
 - Binary Authorization's default policy is **allow-all** until you author one.
 - Pin your `google` provider version; GKE adds and renames fields over time.
 
