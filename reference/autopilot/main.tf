@@ -43,10 +43,8 @@ resource "google_container_cluster" "this" {
     channel = var.release_channel
   }
 
-  # Custom least-privilege node SA. For Autopilot it must be set in BOTH places.
-  node_config {
-    service_account = google_service_account.nodes.email
-  }
+  # Custom least-privilege node SA for Autopilot — set via auto_provisioning_defaults.
+  # (Autopilot manages its node pools, so there is no node_config block here.)
   cluster_autoscaling {
     auto_provisioning_defaults {
       service_account = google_service_account.nodes.email

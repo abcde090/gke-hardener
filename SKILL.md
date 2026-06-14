@@ -13,7 +13,7 @@ If the user has no hard requirement to manage node pools themselves, recommend *
 
 **Autopilot is not "secure by itself."** You still configure, on Autopilot or Standard alike:
 - **Private networking** — Autopilot defaults to **public nodes and a public control-plane endpoint**.
-- **A custom least-privilege node service account** — Autopilot defaults to the **Compute Engine default SA**. In Terraform you must set it in **both** `node_config.service_account` **and** `cluster_autoscaling.auto_provisioning_defaults.service_account`.
+- **A custom least-privilege node service account** — Autopilot defaults to the **Compute Engine default SA**. In Terraform, set it via `cluster_autoscaling.auto_provisioning_defaults.service_account` (Autopilot has no `node_config` of its own).
 - **Binary Authorization**, **CMEK Secret encryption**, and **security-bulletin notifications**.
 
 Use `reference/autopilot/` for a hardened Autopilot cluster, or `reference/standard/` for a hardened Standard cluster.
@@ -38,7 +38,7 @@ Use `reference/autopilot/` for a hardened Autopilot cluster, or `reference/stand
 ## Gotchas (these are the ones people get wrong)
 
 - `insecure_kubelet_readonly_port_enabled` is a **string** `"FALSE"`/`"TRUE"`, not a boolean.
-- Autopilot ≠ skip everything: nodes default to the Compute Engine SA unless you set a custom one in **both** `node_config` and `cluster_autoscaling.auto_provisioning_defaults`.
+- Autopilot ≠ skip everything: nodes default to the Compute Engine SA unless you set a custom one via `cluster_autoscaling.auto_provisioning_defaults.service_account` (Autopilot only — not `node_config`).
 - Private nodes have **no outbound internet** — add Cloud NAT + Private Google Access or image pulls fail.
 - DNS endpoint `allow_external_traffic = false` makes the control plane **unreachable from a laptop** (in-Google-Cloud only). Set `true` if the user needs remote `kubectl` without a VPN.
 - Binary Authorization's default policy is **allow-all** until you author one.
